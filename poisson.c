@@ -4,39 +4,45 @@
 
 #define STEP 500.
 
-static size_t number_of_classes=0;
+static size_t catalogue_size=0;
 static double *popularity=NULL;
 static double alpha=1.;
 
+typedef struct zipfgen {
+        double alpha;
+        size_t catalogue_size;
+        double *popularity_dist;
+} zipf_generator;
+
 static void initialize_zipf ()
 {
-        double sum, pop;
-        if(!number_of_classes) { return; }
+        double sum=0, pop;
+        if(!catalogue_size) { return; }
         if (popularity) { free(popularity); }
-        popularity = (double *) malloc(sizeof(double) * number_of_classes);
+        popularity = (double *) malloc(sizeof(double) * catalogue_size);
 
-        for (int i=0; i<number_of_classes; i++) {
+        for (size_t i=0; i<catalogue_size; i++) {
                 pop = 1. / pow(i+1, alpha);
                 sum += pop;
                 popularity[i] = pop;
         }
 
-        for (int i=0; i<number_of_classes; i++) {
+        for (size_t i=0; i<catalogue_size; i++) {
                 popularity[i] /= sum;
         }
 
         return;
 }
 
-size_t get_number_of_classes (void)
+size_t get_catalogue_size (void)
 {
-        return number_of_classes;
+        return catalogue_size;
 }
 
-void set_number_of_classes(size_t nb_of_classes)
+void set_catalogue_size(size_t cat_size)
 {
-        if (number_of_classes != nb_of_classes) {
-                number_of_classes = nb_of_classes;
+        if (catalogue_size != cat_size) {
+                catalogue_size = cat_size;
                 initialize_zipf();
         }
 }
@@ -56,7 +62,7 @@ void set_alpha (double a)
 
 double get_popularity (size_t k)
 {
-        if (k<number_of_classes) {
+        if (k<catalogue_size) {
                 return popularity[k];
         }
         return 0;
@@ -70,3 +76,5 @@ double poisson (double lambda)
         } while (r==1 || r==0);
         return -log(r) / lambda;
 }
+
+

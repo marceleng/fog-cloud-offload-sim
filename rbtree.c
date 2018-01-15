@@ -21,28 +21,28 @@ static int DEFAULT_POLICY = POLICY_INSERT;
  */
 
 // Sets child as a child of tree on side left
-void _rbtree_update_child(rbtree * tree, rbtree * child, int left);
+static void _rbtree_update_child(rbtree * tree, rbtree * child, int left);
 
 // Inserts node in tree using binary search. *modified=1 if the tree has been modified
-rbtree * _rbtree_bst_insert(rbtree *tree, rbtree *node, int policy, int *modified);
+static rbtree * _rbtree_bst_insert(rbtree *tree, rbtree *node, int policy, int *modified);
 
 //Family functions
-rbtree * _rbtree_gp(rbtree *node);
-rbtree* _rbtree_s(rbtree *node, int *side); //Side contains side of node wrt its parent
-rbtree* _rbtree_u(rbtree *node);
-rbtree* _rbtree_c(rbtree *node, int side); //Returns left or right child depending on side
+static rbtree * _rbtree_gp(rbtree *node);
+static rbtree* _rbtree_s(rbtree *node, int *side); //Side contains side of node wrt its parent
+static rbtree* _rbtree_u(rbtree *node);
+static rbtree* _rbtree_c(rbtree *node, int side); //Returns left or right child depending on side
 
 //Rotations
-rbtree* _rbtree_rotate_left(rbtree *tree);
-rbtree* _rbtree_rotate_right(rbtree *tree);
-rbtree *_rbtree_rotate(rbtree *tree, int side);
+static rbtree* _rbtree_rotate_left(rbtree *tree);
+static rbtree* _rbtree_rotate_right(rbtree *tree);
+static rbtree *_rbtree_rotate(rbtree *tree, int side);
 
-void _rbtree_exchange_colors(rbtree *node1, rbtree *node2);
+static void _rbtree_exchange_colors(rbtree *node1, rbtree *node2);
 /*
  * END HELPERS
  */
 
-rbtree* _rbtree_gp(rbtree *node)
+static rbtree* _rbtree_gp(rbtree *node)
 {
 	if (!node->parent)
 		return NULL;
@@ -50,7 +50,7 @@ rbtree* _rbtree_gp(rbtree *node)
 		return node->parent->parent;
 }
 
-rbtree* _rbtree_s(rbtree *node, int *side)
+static rbtree* _rbtree_s(rbtree *node, int *side)
 {
 	rbtree *ret = NULL;
 	if (node->parent) {
@@ -66,7 +66,7 @@ rbtree* _rbtree_s(rbtree *node, int *side)
 	return ret;
 }
 
-rbtree* _rbtree_u(rbtree *node)
+static rbtree* _rbtree_u(rbtree *node)
 {
 	rbtree *ret = _rbtree_gp(node);
 	if (ret) {
@@ -78,7 +78,7 @@ rbtree* _rbtree_u(rbtree *node)
 	return ret;
 }
 
-rbtree *_rbtree_c(rbtree *node, int side)
+static rbtree *_rbtree_c(rbtree *node, int side)
 {
 	if (node && (side == LEFT)) {
 		return node->lchild;
@@ -89,7 +89,7 @@ rbtree *_rbtree_c(rbtree *node, int side)
 	return NULL;
 }
 
-void _rbtree_exchange_colors(rbtree *node1, rbtree *node2)
+static void _rbtree_exchange_colors(rbtree *node1, rbtree *node2)
 {
 	assert(node1 && node2);
 	int color = node1->color;
@@ -97,7 +97,7 @@ void _rbtree_exchange_colors(rbtree *node1, rbtree *node2)
 	node2->color = color;
 }
 
-void _rbtree_update_child(rbtree * tree, rbtree *child, int left)
+static void _rbtree_update_child(rbtree * tree, rbtree *child, int left)
 {
 	if (left) 
 		tree->lchild = child;
@@ -108,7 +108,7 @@ void _rbtree_update_child(rbtree * tree, rbtree *child, int left)
 		child->parent = tree;
 }
 
-rbtree * _rbtree_bst_insert(rbtree *tree, rbtree *node, int policy, int *modified)
+static rbtree * _rbtree_bst_insert(rbtree *tree, rbtree *node, int policy, int *modified)
 {
 	*modified = 1;
 	if (!tree) {
@@ -142,12 +142,14 @@ rbtree* rbtree_alloc()
 
 void rbtree_free(rbtree *tree)
 {
-	if (tree->lchild)
-		rbtree_free(tree->lchild);
-	else if (tree->rchild)
-		rbtree_free(tree->rchild);
-	free(tree->item);
-	free(tree);
+        if(tree) {
+                if (tree->lchild)
+                        rbtree_free(tree->lchild);
+                else if (tree->rchild)
+                        rbtree_free(tree->rchild);
+                free(tree->item);
+                free(tree);
+        }
 }
 
 void rbtree_set_default_policy(int policy)
@@ -175,7 +177,7 @@ size_t rbtree_size(rbtree *tree)
 }
 
 
-rbtree* _rbtree_rotate_left(rbtree *tree)
+static rbtree* _rbtree_rotate_left(rbtree *tree)
 {
 	rbtree *old_root = tree->parent;
 
@@ -195,7 +197,7 @@ rbtree* _rbtree_rotate_left(rbtree *tree)
 	return tree;
 }
 
-rbtree* _rbtree_rotate_right(rbtree *tree)
+static rbtree* _rbtree_rotate_right(rbtree *tree)
 {
 
 	rbtree *old_root = tree->parent;
@@ -216,7 +218,7 @@ rbtree* _rbtree_rotate_right(rbtree *tree)
 	return tree;
 }
 
-rbtree *_rbtree_rotate(rbtree *tree, int side)
+static rbtree * _rbtree_rotate(rbtree *tree, int side)
 {
 	rbtree * ret = NULL;
 	if (side == RIGHT) {
@@ -299,7 +301,7 @@ rbtree* rbtree_insert_policy(rbtree *tree, void *item, key_t key, int policy)
 	return tree;
 }
 
-void _rbtree_flatten(rbtree *x, void **item_buffer, key_t *key_buffer, size_t *count)
+static void _rbtree_flatten(rbtree *x, void **item_buffer, key_t *key_buffer, size_t *count)
 {
 	if (x) {
 		_rbtree_flatten(x->lchild, item_buffer, key_buffer, count);
@@ -325,7 +327,7 @@ void rbtree_flatprint(rbtree *x)
 	}
 }
 
-rbtree* _rbtree_search(rbtree *tree, key_t key) {
+static rbtree * _rbtree_search(rbtree *tree, key_t key) {
 	if (!tree) {
 		return NULL;
 	}
@@ -377,7 +379,7 @@ int rbtree_verify(rbtree *tree) {
 	return ((tree->color == COLOR_RED) ? nb_black_l : nb_black_l + 1);
 }
 
-rbtree *_rbtree_find_successor (rbtree *tree)
+static rbtree * _rbtree_find_successor (rbtree *tree)
 {
 	if (!tree->rchild) {
 		return tree;
@@ -389,7 +391,7 @@ rbtree *_rbtree_find_successor (rbtree *tree)
 	return cur_node;
 }
 
-rbtree *_rbtree_remove(rbtree *node, void **item)
+static rbtree * _rbtree_remove(rbtree *node, void **item)
 {
 	assert(node);
 	//Ref: https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/

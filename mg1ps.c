@@ -19,7 +19,7 @@ mg1ps * mg1ps_alloc (double work_rate)
         mg1ps *ret = (mg1ps *) malloc(sizeof(mg1ps));
         ret->work_rate = work_rate;
         ret->nb_processes = 0;
-        ret->processes = rbtree_alloc();
+        ret->processes = NULL;
         return ret;
 }
 
@@ -37,7 +37,7 @@ double substract_key (double current_time, __attribute__((unused)) void *item, v
         return current_time - *(double *) coef;
 }
 
-void _mg1ps_add_process (mg1ps * queue, process_t *process)
+static void _mg1ps_add_process (mg1ps * queue, process_t *process)
 {
         size_t new_nb_processes = queue->nb_processes+1;
 
@@ -48,7 +48,7 @@ void _mg1ps_add_process (mg1ps * queue, process_t *process)
         queue->nb_processes = new_nb_processes;
 }
 
-void _mg1ps_remove_work (mg1ps * queue, double work)
+static void _mg1ps_remove_work (mg1ps * queue, double work)
 { 
         rbtree_apply_func_key(queue->processes, &substract_key, &work);
 }
@@ -68,7 +68,7 @@ void mg1ps_arrival (mg1ps * queue, size_t pid, double job_size)
         _mg1ps_add_process (queue, process);
 }
 
-process_t * _mg1ps_next_process(mg1ps *queue, double *work)
+static process_t * _mg1ps_next_process(mg1ps *queue, double *work)
 {
         return (process_t *) rbtree_head(queue->processes, work);
 }
@@ -91,6 +91,8 @@ size_t mg1ps_reach_next_process(mg1ps *queue)
         process_t * process = NULL;
         
         queue->processes = rbtree_pop(queue->processes, &work, (void **) &process);
+        queue->nb_processes--;
+        assert(rbtree_size(queue->processes) == queue->nb_processes);
 
         _mg1ps_remove_work(queue, work);
 

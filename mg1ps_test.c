@@ -18,8 +18,8 @@ int main (int argc, char *argv[])
 
         mg1ps * queue = mg1ps_alloc(mu);
 
-        double res[nb_arrivals];
-        memset(&res[0], '\0', sizeof(res));
+        double *res = (double *) malloc(sizeof(double) * nb_arrivals);
+        memset(res, '\0', sizeof(double)*nb_arrivals);
 
         double next_arrival = poisson(lambda);
         double current_time = 0;
@@ -34,12 +34,14 @@ int main (int argc, char *argv[])
                         //TODO: remove process and update stats
                         mg1ps_reach_next_process(queue);
                         current_time += next_process_end;
+                        //printf("Process %zu started at %f and stopped at %f\n", next_exit, res[next_exit-1], current_time);
                         res[next_exit-1] = current_time - res[next_exit-1];
                         
                 }
                 //TODO add new process with pid i
-                mg1ps_remove_time(queue, lambda-current_time);
+                mg1ps_remove_time(queue, next_arrival-current_time);
                 mg1ps_arrival(queue, i, job_size);
+                current_time = next_arrival;
                 res[i-1] = current_time;
                 next_arrival = poisson(lambda) + current_time;
         }
@@ -47,6 +49,7 @@ int main (int argc, char *argv[])
         while ((next_exit = mg1ps_next_process(queue, &next_process_end))) {
                 mg1ps_reach_next_process(queue);
                 current_time += next_process_end;
+                //printf("Process %zu started at %f and stopped at %f\n", next_exit, res[next_exit-1], current_time);
                 res[next_exit-1] = current_time - res[next_exit-1];
         }
 
@@ -56,6 +59,9 @@ int main (int argc, char *argv[])
         }
         sum /= nb_arrivals;
         printf("Average queueing time: %f\n", sum);
+
+        mg1ps_free(queue);
+        free(res);
 
         return 0;
 }

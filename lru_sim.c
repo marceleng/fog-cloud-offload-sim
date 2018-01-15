@@ -46,7 +46,7 @@ void lru_free(lru_filter * lru)
         free(lru);
 }
 
-lru_node *_lru_node_alloc(size_t entry)
+static lru_node *_lru_node_alloc(size_t entry)
 {
         lru_node *node = (lru_node *) malloc(sizeof(lru_node));
         node->key = entry;
@@ -55,7 +55,7 @@ lru_node *_lru_node_alloc(size_t entry)
         return node;
 }
 
-lru_node* _lru_remove_node (size_t entry, lru_filter *lru)
+static lru_node* _lru_remove_node (size_t entry, lru_filter *lru)
 {
         lru_node *node=lru->map[entry];
         assert (entry < lru->map_size);
@@ -81,7 +81,7 @@ lru_node* _lru_remove_node (size_t entry, lru_filter *lru)
         return node;
 }
 
-void _lru_free_head (lru_filter *lru)
+static void _lru_free_head (lru_filter *lru)
 {
         lru_node *h = lru->head;
         if (h) {
@@ -90,7 +90,7 @@ void _lru_free_head (lru_filter *lru)
         }
 }
 
-void _lru_free_tail (lru_filter *lru)
+static void _lru_free_tail (lru_filter *lru)
 {
         lru_node *t = lru->tail;
         if (t) {
@@ -102,7 +102,7 @@ void _lru_free_tail (lru_filter *lru)
         }
 }
 
-void _lru_insert_head (lru_filter *lru, lru_node *node)
+static void _lru_insert_head (lru_filter *lru, lru_node *node)
 {
         assert(!lru->map[node->key]);
 

@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include "rbtree.h"
-#include "lru_sim.h"
-#include "zipf.h"
+#include "helpers/rbtree.h"
+#include "caches/lru.h"
 
 typedef struct lru_node {
         size_t key;
@@ -12,14 +11,14 @@ typedef struct lru_node {
         struct lru_node* parent;
 } lru_node;
 
-typedef struct lru_filter {
+struct lru_filter {
         uint32_t lru_size; // Size of the LRU filter
         uint32_t nb_objects; // Nb of objects stored in the LRU filter
         lru_node * head; // Head of the filter
         lru_node * tail; // Tail of the filter
         uint32_t map_size; // Catalogue size
         lru_node ** map; // Mapping between content id and filter node
-} lru_filter;
+};
 
 lru_filter *lru_alloc(size_t lru_size, size_t catalogue_size)
 {
@@ -81,7 +80,7 @@ static lru_node* _lru_remove_node (size_t entry, lru_filter *lru)
         return node;
 }
 
-static void _lru_free_head (lru_filter *lru)
+__attribute__((unused)) static void _lru_free_head (lru_filter *lru)
 {
         lru_node *h = lru->head;
         if (h) {
@@ -147,21 +146,4 @@ int lru_update(size_t entry, lru_filter *lru)
         }
         
         return ret;
-}
-
-int lru_process_function(rbtree **pqueue, lru_filter *lru, double lambda)
-{
-        double time_key;
-        size_t catalogue_key;
-        
-        *pqueue = rbtree_pop(*pqueue, &time_key, (void **) &catalogue_key);
-
-        //printf("Got key %zu at time %f\n", catalogue_key, time_key);
-
-        double lambdak = get_popularity(catalogue_key) * lambda;
-        double next_time = poisson(lambdak) + time_key;
-
-        *pqueue = rbtree_insert(*pqueue, (void *) catalogue_key, next_time);
-
-        return lru_update(catalogue_key, lru);
 }

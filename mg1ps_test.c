@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mg1ps.h"
-#include "zipf.h"
+#include "queueing/mg1ps.h"
+#include "helpers/random_generators.h"
 
 int main (int argc, char *argv[])
 {
@@ -21,7 +21,7 @@ int main (int argc, char *argv[])
         double *res = (double *) malloc(sizeof(double) * nb_arrivals);
         memset(res, '\0', sizeof(double)*nb_arrivals);
 
-        double next_arrival = poisson(lambda);
+        double next_arrival = exponential_generator(lambda);
         double current_time = 0;
         size_t next_exit = 0;
         double next_process_end = 0;
@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
                 mg1ps_arrival(queue, i, job_size);
                 current_time = next_arrival;
                 res[i-1] = current_time;
-                next_arrival = poisson(lambda) + current_time;
+                next_arrival = exponential_generator(lambda) + current_time;
         }
 
         while ((next_exit = mg1ps_next_process(queue, &next_process_end))) {

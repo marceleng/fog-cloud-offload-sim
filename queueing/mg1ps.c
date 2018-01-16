@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "rbtree.h"
+#include "helpers/rbtree.h"
 
 typedef struct process {
         size_t id;

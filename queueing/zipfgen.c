@@ -1,10 +1,9 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include "zipfgen.h"
-#include "zipf.h"
-#include "rbtree.h"
+#include "helpers/random_generators.h"
+#include "helpers/rbtree.h"
 
 struct zipfgen {
         double alpha;
@@ -17,8 +16,7 @@ struct zipfgen {
 
 static double _zipfgen_gen_arrival (zipfgen *z, double basetime, size_t * key)
 {
-        assert(z->catalogue_size > *key);
-        double next_arrival = basetime + poisson((z->lambda * z->popularity_dist[*key])/z->norm_factor);
+        double next_arrival = basetime + exponential_generator((z->lambda * z->popularity_dist[*key])/z->norm_factor);
         //printf("Next arrival for %zu is %f\n", *key, next_arrival);
         z->arrivals = rbtree_insert(z->arrivals, (void *) key, next_arrival);
         return next_arrival;
@@ -115,7 +113,7 @@ void zipfgen_set_alpha (zipfgen *z, double a)
 double zipfgen_get_popularity (zipfgen *z, size_t k)
 {
         if (k<z->catalogue_size) {
-                return z->popularity_dist[k];
+                return z->popularity_dist[k] / z->norm_factor;
         }
         return 0;
 }

@@ -154,11 +154,11 @@ void rbtree_free(rbtree *tree)
 
 void rbtree_set_default_policy(int policy)
 {
-	assert(policy == POLICY_IGNORE || policy==POLICY_INSERT
 #ifdef POLICY_OVERRIDE
-			|| policy==POLICY_OVERRIDE
+	assert(policy == POLICY_IGNORE || policy==POLICY_INSERT || policy==POLICY_OVERRIDE);
+#else
+	assert(policy == POLICY_IGNORE || policy==POLICY_INSERT);
 #endif
-			);
 
 	DEFAULT_POLICY = policy;
 }

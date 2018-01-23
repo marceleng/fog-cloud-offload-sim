@@ -1,6 +1,8 @@
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
 
+#include <stdlib.h>
+
 #include "mg1ps.h"
 #include "mginf.h"
 
@@ -25,5 +27,7 @@ void queue_net_update_time(int number_of_queues, queue_t **queues, double time);
 /* Integrators */
 queue_t * queue_from_mg1ps (mg1ps *);
 queue_t * queue_from_mginf (mginf *);
+queue_t * queue_logging_sink_alloc (size_t log_size);
+void * queue_logging_sink_get_log (queue_t *queue);
 
 #endif

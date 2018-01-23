@@ -83,8 +83,42 @@ void queue_net_update_time(int number_of_queues, queue_t **queues, double time)
 }
 
 /*
- * MG1PS integration
+ * MGINF integration
  */
+static void _queue_mginf_arrival(void * queue, void * request, double job_size)
+{
+        mginf_arrival((mginf *) queue, request, job_size);
+}
+
+static void * _queue_mginf_pop_next_exit(void * queue)
+{
+        return mginf_reach_next_process((mginf *) queue);
+}
+
+static void _queue_mginf_update_time ( void* queue, double time)
+{
+        mginf_remove_time((mginf *) queue, time);
+}
+
+static double _queue_minf_next_exit (void * queue)
+{
+        return mginf_next_process((mginf *) queue, (void **) NULL);
+}
+
+queue_t * queue_from_mginf (mginf * queue)
+{
+        queue_t * ret = (queue_t *) sizeof(queue_t);
+
+        ret->queue = queue;
+        ret->arrival = _queue_mginf_arrival;
+        ret->pop_next_exit = _queue_mginf_pop_next_exit;
+        ret->update_time = _queue_mginf_update_time;
+        ret->next_exit = _queue_minf_next_exit;
+        ret->output_queue = NULL;
+
+        return ret;
+}
+
 
 static void _queue_mg1ps_arrival(void * queue, void * request, double job_size)
 {
@@ -116,6 +150,17 @@ queue_t * queue_from_mg1ps (mg1ps * queue)
         ret->update_time = _queue_mg1ps_update_time;
         ret->next_exit = _queue_m1ps_next_exit;
         ret->output_queue = NULL;
+
+        return ret;
+}
+
+/*
+ * LOGGING SINK
+ */
+queue_t *queue_logging_sink_alloc (size_t log_size)
+{
+        queue_t *ret = (queue_t *) malloc(sizeof(queue_t));
+        ret->queue = (void *)
 
         return ret;
 }

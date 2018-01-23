@@ -4,7 +4,7 @@
 #include "helpers/rbtree.h"
 
 typedef struct process {
-        size_t id;
+        void * job;
         double total_work; // Total time for executing the process
 } process_t;
 
@@ -59,10 +59,10 @@ void mg1ps_remove_time (mg1ps * queue, double time)
         _mg1ps_remove_work(queue, removed_work);
 }
 
-void mg1ps_arrival (mg1ps * queue, size_t pid, double job_size)
+void mg1ps_arrival (mg1ps * queue, void * job, double job_size)
 {
         process_t *process = (process_t *) malloc(sizeof(process_t));
-        process->id = pid;
+        process->job = job;
         process->total_work = job_size;
 
         _mg1ps_add_process (queue, process);
@@ -73,20 +73,22 @@ static process_t * _mg1ps_next_process(mg1ps *queue, double *work)
         return (process_t *) rbtree_head(queue->processes, work);
 }
 
-size_t mg1ps_next_process (mg1ps *queue, double *time)
+double mg1ps_next_process (mg1ps *queue, void **job)
 {
-        process_t * process = _mg1ps_next_process(queue, time);
-        size_t ret = 0;
+        double ret = -1;
+        process_t * process = _mg1ps_next_process(queue, &ret);
         if (process) {
-                *time = *time / (queue->work_rate / queue->nb_processes);
-                ret = process->id;
+                ret = ret / (queue->work_rate / queue->nb_processes);
+                if (job) {
+                        *job = process->job;
+                }
         }
         return ret;
 }
 
-size_t mg1ps_reach_next_process(mg1ps *queue)
+void * mg1ps_reach_next_process(mg1ps *queue)
 {
-        size_t ret = 0;
+        void * ret = NULL;
         double work=0;
         process_t * process = NULL;
         
@@ -96,7 +98,7 @@ size_t mg1ps_reach_next_process(mg1ps *queue)
 
         _mg1ps_remove_work(queue, work);
 
-        ret = process->id;
+        ret = process->job;
 
         free(process);
 

@@ -13,7 +13,7 @@ struct queue {
 
 void queue_arrival (queue_t *queue, void *request, double job_size)
 {
-        return queue->arrival(queue->queue, request, job_size);
+        queue->arrival(queue->queue, request, job_size);
 }
 
 void *queue_pop_next_exit(queue_t *queue)
@@ -23,7 +23,7 @@ void *queue_pop_next_exit(queue_t *queue)
 
 void queue_update_time (queue_t *queue, double time)
 {
-        return queue->update_time(queue->queue, time);
+        queue->update_time(queue->queue, time);
 }
 
 double queue_next_exit (queue_t *queue)

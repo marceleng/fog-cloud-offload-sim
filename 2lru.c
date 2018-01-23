@@ -20,7 +20,7 @@ void lru_test (double alpha, double lambda, size_t catalogue_size, size_t lru_si
                 int hit = 0;
                 
                 //printf("%zu ", catalogue_key);
-                if (lru_update(catalogue_key, cache)) {
+                if (lru_update(cache, catalogue_key)) {
                         hit = 1;
                 }
                 //printf ("%d\n", hit);
@@ -49,7 +49,7 @@ void lru2_test (double alpha, double lambda, size_t catalogue_size, size_t lru_s
                 int hit = 0;
                 
                 //printf("%zu ", catalogue_key);
-                if (lru_update(catalogue_key, filter) && lru_update(catalogue_key, cache)) {
+                if (lru_update(filter, catalogue_key) && lru_update(cache, catalogue_key)) {
                         hit = 1;
                 }
                 //printf ("%d\n", hit);

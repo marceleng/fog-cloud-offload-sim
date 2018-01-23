@@ -127,7 +127,7 @@ static void _lru_insert_head (lru_filter *lru, lru_node *node)
  * lru_size: size of LRU cache
  * returns 1 if hit, 0 if miss
  */
-int lru_update(size_t entry, lru_filter *lru)
+int lru_update(lru_filter * lru, size_t entry)
 {
 
         int ret = 0;
@@ -146,4 +146,13 @@ int lru_update(size_t entry, lru_filter *lru)
         }
         
         return ret;
+}
+
+void lru_resize(lru_filter *lru, size_t new_size)
+{
+        lru->lru_size = new_size;
+        while (lru->nb_objects > lru->lru_size)
+        {
+                _lru_free_tail(lru);
+        }
 }

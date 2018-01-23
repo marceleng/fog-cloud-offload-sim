@@ -1,4 +1,5 @@
 #include "mginf.h"
+#include "mg1ps.h"
 #include "helpers/rbtree.h"
 
 struct mginf {
@@ -20,9 +21,6 @@ void mginf_free (mginf *queue)
         free(queue);
 }
 
-double substract_key (double current_time, __attribute__((unused)) void *item, void *coef) {
-        return current_time - *(double *) coef;
-}
 static void _mginf_remove_work (mginf * queue, double work)
 { 
         rbtree_apply_func_key(queue->processes, &substract_key, &work);

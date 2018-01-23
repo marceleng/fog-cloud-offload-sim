@@ -15,4 +15,6 @@ void * mg1ps_reach_next_process (mg1ps *queue);
 //Let the queue run for a given amount of time
 //WARNING: make sure not to overload the next deadline
 void mg1ps_remove_time (mg1ps *, double);
+
+double substract_key(double current_time, void *item, void *args);
 #endif

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h> //INFINITY
 #include "queue.h"
 
 struct queue {
@@ -48,6 +49,38 @@ void queue_set_output_selection (queue_t* queue,
         queue->output_queue = output_selection;
 }
 
+
+queue_t * queue_net_find_next_exit(int number_of_queues, queue_t **queues, double *time)
+{
+        *time = INFINITY;
+        queue_t * ret = NULL;
+        for(int i=0; i<number_of_queues; i++) {
+                double next = queue_next_exit(queues[i]);
+                if (next < *time) {
+                        ret = queues[i];
+                        *time = next;
+                }
+        }
+        return ret;
+}
+
+double queue_net_make_next_update(int number_of_queues, queue_t **queues)
+{
+        double time = INFINITY;
+        queue_t *next_queue = queue_net_find_next_exit(number_of_queues, queues, &time);
+        if (next_queue) {
+                queue_net_update_time(number_of_queues, queues, time);
+                queue_fwd_next_request(next_queue);
+        }
+        return time;
+}
+
+void queue_net_update_time(int number_of_queues, queue_t **queues, double time)
+{
+        for (int i=0; i<number_of_queues; i++) {
+                queue_update_time(queues[i], time);
+        }
+}
 
 /*
  * MG1PS integration

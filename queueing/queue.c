@@ -71,7 +71,7 @@ void *queue_fwd_next_request(queue_t *queue)
         if (queue->output_queue) {
                 queue_t * next = queue->output_queue(ret);
 
-                LOG("Forwarding request from %s to %s\n", queue->name, next->name);
+                LOG(LOG_DEBUG,"Forwarding request from %s to %s\n", queue->name, next->name);
 
                 queue_arrival(next, ret);
         }

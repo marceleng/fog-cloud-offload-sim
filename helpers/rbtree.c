@@ -324,7 +324,7 @@ void rbtree_flatprint(rbtree *x)
 {
 	if(x) {
 		rbtree_flatprint(x->lchild);
-		LOG("%f ", x->key);
+		printf("%f ", x->key);
 		rbtree_flatprint(x->rchild);
 	}
 }
@@ -357,11 +357,11 @@ int rbtree_verify(rbtree *tree) {
 
 	if (tree->color == COLOR_RED){
 		if(COLOR(tree->lchild) == COLOR_RED) {
-			LOG("Left child of node %f is also red\n", tree->key);
+			LOG(LOG_ERROR,"Left child of node %f is also red\n", tree->key);
 			return 0;
 		}
 		if(COLOR(tree->rchild) == COLOR_RED) {
-			LOG("Right child of node %f is also red\n", tree->key);
+			LOG(LOG_ERROR, "Right child of node %f is also red\n", tree->key);
 			return 0;
 		}
 	}
@@ -374,7 +374,7 @@ int rbtree_verify(rbtree *tree) {
 	}
 
 	if (nb_black_l != nb_black_r) {
-		LOG("Black violation at node %f\n", tree->key);
+		LOG(LOG_ERROR, "Black violation at node %f\n", tree->key);
 		return 0;
 	}
 

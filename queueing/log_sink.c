@@ -32,7 +32,7 @@ void log_sink_free(log_sink *log)
 
 void log_sink_arrival(log_sink *log, void *request)
 {
-        LOG("Inserting object in log at time %f\n", log->time);
+        LOG(LOG_DEBUG, "Inserting object in log at time %f\n", log->time);
         log->objects = rbtree_insert(log->objects, request, log->time);
         log->nb_of_objects++;
         assert(rbtree_size(log->objects) == log->nb_of_objects);
@@ -48,7 +48,7 @@ size_t log_sink_get_log(log_sink *log, double *arrivals, void **requests)
 void log_sink_add_time(log_sink *log, double time)
 {
         log->time += time;
-        LOG("Updated time by %f, new time is now %f\n", time, log->time);
+        LOG(LOG_DEBUG, "Updated time by %f, new time is now %f\n", time, log->time);
 }
 
 size_t log_sink_get_number_of_objects(log_sink *log)

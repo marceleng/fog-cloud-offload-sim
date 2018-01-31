@@ -137,7 +137,7 @@ log_sink *initialize ()
 int main (int argc, char *argv[])
 {
         if(argc!=3) {
-                LOG("Usage: ./fog_simulator [lambda] [number of arrivals] \n");
+                LOG(LOG_ERROR, "Usage: ./fog_simulator [lambda] [number of arrivals] \n");
                 return -1;
         }
 
@@ -146,14 +146,14 @@ int main (int argc, char *argv[])
         double lambda = strtod(argv[1], NULL);
         size_t number_of_arrivals = strtoul(argv[2], NULL, 10);
 
-        LOG("Initializing queueing network... \n");
+        LOG(LOG_INFO, "Initializing queueing network... \n");
 
         log_sink *sink = initialize();
-        LOG("Precomputing popularities...\n");
+        LOG(LOG_INFO, "Precomputing popularities...\n");
         zipfgen * arrival_gen = zipfgen_alloc(alpha, catalogue_size, lambda);
        
 
-        LOG("Done, starting simulation\n");
+        LOG(LOG_INFO, "Done, starting simulation\n");
 
         int number_of_queues = 9;
         queue_t * queues[number_of_queues];
@@ -185,7 +185,7 @@ int main (int argc, char *argv[])
                                 (queue_next_arrival < (request->arrival-current_time))) {
                         queue_next_arrival = queue_net_make_next_update(number_of_queues, queues);
                         current_time += queue_next_arrival;
-                        LOG("Updated current time to %f\n", current_time);
+                        LOG(LOG_DEBUG, "Updated current time to %f\n", current_time);
                 }
                 
                 queue_net_update_time(number_of_queues, queues, request->arrival - current_time);
@@ -210,13 +210,7 @@ int main (int argc, char *argv[])
         log_size = log_sink_get_log(sink, &arrivals[0],(void **) &res[0]);
         
         for (size_t i = 0; i<log_size; i++) {
-                if (!(res[i])) {
-                        LOG("Stopped at %zu\n",i);
-                        break;
-                }
-                else {
-                        printf("%zu,%zu,%f,%f\n",res[i]->id,res[i]->content,res[i]->arrival,arrivals[i]);
-                }
+                printf("%zu,%zu,%f,%f\n",res[i]->id,res[i]->content,res[i]->arrival,arrivals[i]);
         }
 
 

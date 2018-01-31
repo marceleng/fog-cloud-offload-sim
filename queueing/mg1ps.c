@@ -11,15 +11,17 @@ typedef struct process {
 typedef struct mg1ps {
         double work_rate;
         size_t nb_processes;
+        double (*distribution)(void);
         rbtree *processes; // Processes sorted by remaining amount of WORK
 } mg1ps;
 
-mg1ps * mg1ps_alloc (double work_rate)
+mg1ps * mg1ps_alloc (double work_rate, double (*distribution)(void))
 {
         mg1ps *ret = (mg1ps *) malloc(sizeof(mg1ps));
         ret->work_rate = work_rate;
         ret->nb_processes = 0;
         ret->processes = NULL;
+        ret->distribution = distribution;
         return ret;
 }
 
@@ -39,13 +41,11 @@ double substract_key (double current_time, __attribute__((unused)) void *item, v
 
 static void _mg1ps_add_process (mg1ps * queue, process_t *process)
 {
-        size_t new_nb_processes = queue->nb_processes+1;
-
         //Insert new process
         queue->processes = rbtree_insert(queue->processes, (void *) process, process->total_work);
 
         //Update process counter
-        queue->nb_processes = new_nb_processes;
+        queue->nb_processes++;
 }
 
 static void _mg1ps_remove_work (mg1ps * queue, double work)
@@ -59,11 +59,11 @@ void mg1ps_remove_time (mg1ps * queue, double time)
         _mg1ps_remove_work(queue, removed_work);
 }
 
-void mg1ps_arrival (mg1ps * queue, void * job, double job_size)
+void mg1ps_arrival (mg1ps * queue, void * job)
 {
         process_t *process = (process_t *) malloc(sizeof(process_t));
         process->job = job;
-        process->total_work = job_size;
+        process->total_work = queue->distribution();
 
         _mg1ps_add_process (queue, process);
 }
@@ -93,12 +93,13 @@ void * mg1ps_reach_next_process(mg1ps *queue)
         process_t * process = NULL;
         
         queue->processes = rbtree_pop(queue->processes, &work, (void **) &process);
-        queue->nb_processes--;
-        assert(rbtree_size(queue->processes) == queue->nb_processes);
+        if (process) {
+                queue->nb_processes--;
+                assert(rbtree_size(queue->processes) == queue->nb_processes);
+                ret = process->job;
+        }
 
         _mg1ps_remove_work(queue, work);
-
-        ret = process->job;
 
         free(process);
 

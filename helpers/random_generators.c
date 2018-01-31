@@ -1,6 +1,4 @@
 #include "random_generators.h"
-#include <math.h>
-#include <stdlib.h> //arc4random
 
 double exponential_generator (double lambda)
 {

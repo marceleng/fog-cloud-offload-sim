@@ -1,5 +1,6 @@
-CC = gcc
-CFLAGS = -Wall -Werror -pedantic
+CC = clang
+CFLAGS = -g -Wall -Werror -std=gnu99
+LFLAGS = -fsanitize=address
 INCLUDE="."
 
 BUILDIR = $(shell pwd)/build
@@ -7,6 +8,7 @@ BUILDIR = $(shell pwd)/build
 SUBDIRS = caches helpers queueing
 
 2LRU_OBJ = $(addprefix $(BUILDIR)/,2lru.o)
+FOG_SIM_OBJ =  $(addprefix $(BUILDIR)/,fog_simulator.o)
 
 HSOURCES = $(shell find $(SUBDIRS) -type f -iname '*.c')
 

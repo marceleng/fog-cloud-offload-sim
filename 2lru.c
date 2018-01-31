@@ -11,7 +11,6 @@ void lru_test (double alpha, double lambda, size_t catalogue_size, size_t lru_si
 
         zipfgen *generator = zipfgen_alloc(alpha, catalogue_size, lambda);
 
-        //printr("Running iterations\n");
         size_t count = 0;
         for (size_t i=0; i<number_of_queries; i++) {
                 size_t catalogue_key = 0;
@@ -19,11 +18,9 @@ void lru_test (double alpha, double lambda, size_t catalogue_size, size_t lru_si
                 time_key = zipfgen_pop_next_arrival(generator, &catalogue_key);
                 int hit = 0;
                 
-                //printf("%zu ", catalogue_key);
                 if (lru_update(cache, catalogue_key)) {
                         hit = 1;
                 }
-                //printf ("%d\n", hit);
                 count += hit;
         }
 
@@ -40,7 +37,6 @@ void lru2_test (double alpha, double lambda, size_t catalogue_size, size_t lru_s
 
         zipfgen *generator = zipfgen_alloc(alpha, catalogue_size, lambda);
 
-        //printr("Running iterations\n");
         size_t count = 0;
         for (size_t i=0; i<number_of_queries; i++) {
                 size_t catalogue_key = 0;
@@ -48,11 +44,9 @@ void lru2_test (double alpha, double lambda, size_t catalogue_size, size_t lru_s
                 time_key = zipfgen_pop_next_arrival(generator, &catalogue_key);
                 int hit = 0;
                 
-                //printf("%zu ", catalogue_key);
                 if (lru_update(filter, catalogue_key) && lru_update(cache, catalogue_key)) {
                         hit = 1;
                 }
-                //printf ("%d\n", hit);
                 count += hit;
         }
 

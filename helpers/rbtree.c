@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "helpers/log.h"
+
 #include "rbtree.h"
 
 #define COLOR_RED 1
@@ -117,7 +119,6 @@ static rbtree * _rbtree_bst_insert(rbtree *tree, rbtree *node, int policy, int *
 	else if (node->key == tree->key && policy != POLICY_INSERT) {
 #ifdef POLICY_OVERRIDE
 		if (policy == POLICY_OVERRIDE) {
-			//TODO: figure out what happens with tree->item. Should it be freed? (no)
 			tree->item = node->item;
 		}
 #endif
@@ -147,7 +148,6 @@ void rbtree_free(rbtree *tree)
                         rbtree_free(tree->lchild);
                 else if (tree->rchild)
                         rbtree_free(tree->rchild);
-                free(tree->item);
                 free(tree);
         }
 }
@@ -305,7 +305,9 @@ static void _rbtree_flatten(rbtree *x, void **item_buffer, key_t *key_buffer, si
 {
 	if (x) {
 		_rbtree_flatten(x->lchild, item_buffer, key_buffer, count);
-		key_buffer[*count] = x->key;
+                if(key_buffer) {
+                        key_buffer[*count] = x->key;
+                }
 		item_buffer[(*count)++] = x->item;
 		_rbtree_flatten(x->rchild, item_buffer, key_buffer, count);
 	}
@@ -322,7 +324,7 @@ void rbtree_flatprint(rbtree *x)
 {
 	if(x) {
 		rbtree_flatprint(x->lchild);
-		printf("%f ", x->key);
+		LOG("%f ", x->key);
 		rbtree_flatprint(x->rchild);
 	}
 }
@@ -355,11 +357,11 @@ int rbtree_verify(rbtree *tree) {
 
 	if (tree->color == COLOR_RED){
 		if(COLOR(tree->lchild) == COLOR_RED) {
-			printf("Left child of node %f is also red\n", tree->key);
+			LOG("Left child of node %f is also red\n", tree->key);
 			return 0;
 		}
 		if(COLOR(tree->rchild) == COLOR_RED) {
-			printf("Right child of node %f is also red\n", tree->key);
+			LOG("Right child of node %f is also red\n", tree->key);
 			return 0;
 		}
 	}
@@ -372,7 +374,7 @@ int rbtree_verify(rbtree *tree) {
 	}
 
 	if (nb_black_l != nb_black_r) {
-		printf("Black violation at node %f\n", tree->key);
+		LOG("Black violation at node %f\n", tree->key);
 		return 0;
 	}
 

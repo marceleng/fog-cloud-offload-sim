@@ -3,10 +3,10 @@
 
 typedef struct mginf mginf;
 
-mginf *mginf_alloc (double work_rate);
+mginf *mginf_alloc (double work_rate, double (*distribution)(void));
 void mginf_free(mginf * queue);
 
-void mginf_arrival (mginf *, void * job, double job_size);
+void mginf_arrival (mginf *, void * job);
 //Returns process id and stores current remaining time in *time
 double mginf_next_process (mginf *, void **job);
 //Updates queue by reaching next deadline and returns corresponding pid

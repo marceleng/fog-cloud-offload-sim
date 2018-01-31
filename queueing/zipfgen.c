@@ -17,7 +17,6 @@ struct zipfgen {
 static double _zipfgen_gen_arrival (zipfgen *z, double basetime, size_t * key)
 {
         double next_arrival = basetime + exponential_generator((z->lambda * z->popularity_dist[*key])/z->norm_factor);
-        //printf("Next arrival for %zu is %f\n", *key, next_arrival);
         z->arrivals = rbtree_insert(z->arrivals, (void *) key, next_arrival);
         return next_arrival;
 }
@@ -50,7 +49,6 @@ static void _zipfgen_initialize (zipfgen* z)
         for (size_t i=0; i<z->catalogue_size; i++) {
                 //Normalize popularity
                 //z->popularity_dist[i] /= sum;
-                //printf("Setting pop %zu at %Lf\n", i+1, z->popularity_dist[i]);
 
                 //Insert first arrival
                 size_t * key = (size_t *) malloc(sizeof(size_t));

@@ -3,10 +3,10 @@
 
 typedef struct mg1ps mg1ps;
 
-mg1ps *mg1ps_alloc (double work_rate);
+mg1ps *mg1ps_alloc (double work_rate, double (*distribution)(void));
 void mg1ps_free(mg1ps * queue);
 
-void mg1ps_arrival (mg1ps *, void * job, double job_size);
+void mg1ps_arrival (mg1ps *, void * job);
 //Returns process id and stores current remaining time in *time
 double mg1ps_next_process (mg1ps *, void **job);
 //Updates queue by reaching next deadline and returns corresponding pid

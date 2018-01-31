@@ -5,13 +5,15 @@
 struct mginf {
         double work_rate;
         rbtree *processes;
+        double (*distribution)(void);
 };
 
-mginf * mginf_alloc (double work_rate)
+mginf * mginf_alloc (double work_rate, double (*distribution)(void))
 {
         mginf *ret = (mginf *) malloc(sizeof(mginf));
         ret->work_rate = work_rate;
         ret->processes = NULL;
+        ret->distribution = distribution;
         return ret;
 }
 
@@ -32,17 +34,20 @@ void mginf_remove_time (mginf * queue, double time)
         _mginf_remove_work(queue, removed_work);
 }
 
-void mginf_arrival (mginf * queue, void * job, double job_size)
+void mginf_arrival (mginf * queue, void * job)
 {
-        queue->processes = rbtree_insert(queue->processes, (void *) job, job_size);
+        queue->processes = rbtree_insert(queue->processes, (void *) job, queue->distribution());
 }
 
 double mginf_next_process (mginf *queue, void **job)
 {
         double ret = -1;
-        *job = rbtree_head(queue->processes, &ret);
-        if (*job) {
+        void *output = rbtree_head(queue->processes, &ret);
+        if (output) {
                 ret = ret / (queue->work_rate);
+                if (job) {
+                        *job = output;
+                }
         }
         return ret;
 }

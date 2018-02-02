@@ -12,11 +12,11 @@ typedef struct lru_node {
 } lru_node;
 
 struct lru_filter {
-        uint32_t lru_size; // Size of the LRU filter
-        uint32_t nb_objects; // Nb of objects stored in the LRU filter
+        size_t lru_size; // Size of the LRU filter
+        size_t nb_objects; // Nb of objects stored in the LRU filter
         lru_node * head; // Head of the filter
         lru_node * tail; // Tail of the filter
-        uint32_t map_size; // Catalogue size
+        size_t map_size; // Catalogue size
         lru_node ** map; // Mapping between content id and filter node
 };
 

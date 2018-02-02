@@ -16,7 +16,7 @@ struct request {
         double exit;
 };
 
-#define catalogue_size 10000000
+#define catalogue_size 1000000
 #define alpha 1.01
 
 #define x_comp 1e7

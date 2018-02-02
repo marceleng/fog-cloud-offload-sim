@@ -74,7 +74,12 @@ zipfgen * zipfgen_alloc (double alpha, size_t catalogue_size, double lambda)
 void zipfgen_free (zipfgen * z)
 {
         free(z->popularity_dist);
-        rbtree_free(z->arrivals);
+        // Cleans up next arrivals
+        while (z->arrivals != NULL) {
+                void * to_free = NULL;
+                z->arrivals = rbtree_pop(z->arrivals, NULL, &to_free);
+                free(to_free);
+        }
         free(z);
 }
 

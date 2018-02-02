@@ -25,7 +25,7 @@ log_sink *log_sink_alloc()
 void log_sink_free(log_sink *log)
 {
         if(log->objects) {
-                free(log->objects);
+                rbtree_free(log->objects);
         }
         free(log);
 }

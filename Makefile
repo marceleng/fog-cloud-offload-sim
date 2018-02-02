@@ -1,4 +1,11 @@
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
 CC = clang
+FIND = gfind
+else
+CC = gcc
+FIND = gfind
+endif
 CFLAGS = -g -Wall -Werror -std=gnu99
 LFLAGS = -fsanitize=address
 INCLUDE="."
@@ -24,7 +31,7 @@ fog_sim: create_dir $(HOBJECTS) $(FOG_SIM_OBJ)
 
 .SECONDEXPANSION:
 
-$(BUILDIR)/%.o: $$(shell gfind -name $$*.c)
+$(BUILDIR)/%.o: $$(shell $(FIND) -name $$*.c)
 	$(CC) $(CFLAGS) -I$(INCLUDE) -o $@ -c $^
 
 create_dir:

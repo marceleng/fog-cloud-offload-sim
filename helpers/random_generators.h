@@ -1,9 +1,6 @@
 #ifndef _RANDOM_GENERATORS_H_
 #define _RANDOM_GENERATORS_H_
 
-#include <stdlib.h> //arc4random
-#include <math.h>
-
 double exponential_generator (double lambda);
 
 //TODO: find a hack for finishing the macro with ';'

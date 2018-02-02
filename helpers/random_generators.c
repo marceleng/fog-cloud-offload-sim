@@ -1,3 +1,10 @@
+#ifdef __linux__
+#include <bsd/stdlib.h>
+#else
+#endif
+#include <stdlib.h> //arc4random
+
+#include <math.h>
 #include "random_generators.h"
 
 double exponential_generator (double lambda)

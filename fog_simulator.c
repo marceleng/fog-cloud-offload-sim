@@ -195,7 +195,9 @@ int main (int argc, char *argv[])
 
                 queue_next_arrival = 0;
                 next_queue = NULL;
+                LOG(LOG_INFO, "\rArrival %zu/%zu", i, number_of_arrivals);
         }
+        LOG(LOG_INFO, "\n");
         
         //Finish in-flight requests
         while((next_queue = queue_net_find_next_exit(number_of_queues, &queues[0], &queue_next_arrival))) {

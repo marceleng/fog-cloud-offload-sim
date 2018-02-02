@@ -230,7 +230,7 @@ static rbtree * _rbtree_rotate(rbtree *tree, int side)
 	return ret;
 }
 
-rbtree* rbtree_insert(rbtree *tree, void *item, key_t key)
+rbtree* rbtree_insert(rbtree *tree, void *item, rbtree_key_t key)
 {
 	rbtree *ret;
 	if (!tree) {
@@ -244,7 +244,7 @@ rbtree* rbtree_insert(rbtree *tree, void *item, key_t key)
 	return ret;
 }
 
-rbtree* rbtree_insert_policy(rbtree *tree, void *item, key_t key, int policy)
+rbtree* rbtree_insert_policy(rbtree *tree, void *item, rbtree_key_t key, int policy)
 {
 	rbtree *node = rbtree_alloc();
 	node->key = key;
@@ -301,7 +301,7 @@ rbtree* rbtree_insert_policy(rbtree *tree, void *item, key_t key, int policy)
 	return tree;
 }
 
-static void _rbtree_flatten(rbtree *x, void **item_buffer, key_t *key_buffer, size_t *count)
+static void _rbtree_flatten(rbtree *x, void **item_buffer, rbtree_key_t *key_buffer, size_t *count)
 {
 	if (x) {
 		_rbtree_flatten(x->lchild, item_buffer, key_buffer, count);
@@ -313,7 +313,7 @@ static void _rbtree_flatten(rbtree *x, void **item_buffer, key_t *key_buffer, si
 	}
 }
 
-size_t rbtree_flatten(rbtree *x, void **item_buffer, key_t *key_buffer)
+size_t rbtree_flatten(rbtree *x, void **item_buffer, rbtree_key_t *key_buffer)
 {
 	size_t count = 0;
 	_rbtree_flatten(x, item_buffer, key_buffer, &count);
@@ -329,7 +329,7 @@ void rbtree_flatprint(rbtree *x)
 	}
 }
 
-static rbtree * _rbtree_search(rbtree *tree, key_t key) {
+static rbtree * _rbtree_search(rbtree *tree, rbtree_key_t key) {
 	if (!tree) {
 		return NULL;
 	}
@@ -345,7 +345,7 @@ static rbtree * _rbtree_search(rbtree *tree, key_t key) {
 	return NULL;
 }
 
-void *rbtree_search(rbtree *tree, key_t key) {
+void *rbtree_search(rbtree *tree, rbtree_key_t key) {
 	rbtree *ret = _rbtree_search(tree, key);
 	return ((ret) ? ret->item : NULL);
 }
@@ -500,7 +500,7 @@ static rbtree * _rbtree_remove(rbtree *node, void **item)
 	return ret;
 }
 
-rbtree* rbtree_remove(rbtree *tree, key_t key, void **item)
+rbtree* rbtree_remove(rbtree *tree, rbtree_key_t key, void **item)
 {
 	//First let's search the node
 	rbtree *node = _rbtree_search(tree, key);
@@ -510,7 +510,7 @@ rbtree* rbtree_remove(rbtree *tree, key_t key, void **item)
 	return tree;
 }
 
-rbtree *rbtree_pop(rbtree *tree, key_t *key, void **item)
+rbtree *rbtree_pop(rbtree *tree, rbtree_key_t *key, void **item)
 {
 	rbtree *node = tree;
 	if (!node) { return NULL; }
@@ -521,7 +521,7 @@ rbtree *rbtree_pop(rbtree *tree, key_t *key, void **item)
 	return _rbtree_remove(node, item);
 }
 
-void* rbtree_head(rbtree *tree, key_t *key)
+void* rbtree_head(rbtree *tree, rbtree_key_t *key)
 {
 	rbtree *node = tree;
 	if (!node) { return NULL; }
@@ -531,7 +531,7 @@ void* rbtree_head(rbtree *tree, key_t *key)
         return node->item;
 	
 }
-void rbtree_apply_func_key(rbtree *tree, key_t (*func)(key_t, void*, void *), void *args)
+void rbtree_apply_func_key(rbtree *tree, rbtree_key_t (*func)(rbtree_key_t, void*, void *), void *args)
 {
         if(tree) {
                 tree->key = func(tree->key, tree->item, args);
@@ -541,7 +541,7 @@ void rbtree_apply_func_key(rbtree *tree, key_t (*func)(key_t, void*, void *), vo
         return;
 }
 
-void rbtree_apply_func_item(rbtree *tree, void * (*func)(key_t, void*, void *), void *args)
+void rbtree_apply_func_item(rbtree *tree, void * (*func)(rbtree_key_t, void*, void *), void *args)
 {
         if(tree) {
                 tree->item = func(tree->key, tree->item, args);

@@ -15,6 +15,7 @@ struct queue {
         void (*update_time) (void * queue, double time);
         double (*next_exit) (void * queue);
         struct queue *(*output_queue) (void * request);
+        void (*free) (void * queue);
 };
 
 static queue_t *_queue_alloc(char * name)
@@ -27,9 +28,12 @@ static queue_t *_queue_alloc(char * name)
         return ret;
 }
 
-void queue_free (queue_t * queue)
+void queue_free (queue_t * queue, int free_queue)
 {
         free(queue->name);
+        if (free_queue && (queue->free)) {
+                queue->free(queue->queue);
+        }
         free(queue);
 }
 
@@ -136,9 +140,14 @@ static void _queue_mginf_update_time ( void* queue, double time)
         mginf_remove_time((mginf *) queue, time);
 }
 
-static double _queue_minf_next_exit (void * queue)
+static double _queue_mginf_next_exit (void * queue)
 {
         return mginf_next_process((mginf *) queue, (void **) NULL);
+}
+
+static void _queue_mginf_free (void * queue)
+{
+        mginf_free((mginf *) queue);
 }
 
 queue_t * queue_from_mginf (mginf * queue, char *name)
@@ -149,8 +158,9 @@ queue_t * queue_from_mginf (mginf * queue, char *name)
         ret->arrival = _queue_mginf_arrival;
         ret->pop_next_exit = _queue_mginf_pop_next_exit;
         ret->update_time = _queue_mginf_update_time;
-        ret->next_exit = _queue_minf_next_exit;
+        ret->next_exit = _queue_mginf_next_exit;
         ret->output_queue = NULL;
+        ret->free = _queue_mginf_free;
 
         return ret;
 }
@@ -171,9 +181,14 @@ static void _queue_mg1ps_update_time ( void* queue, double time)
         mg1ps_remove_time((mg1ps *) queue, time);
 }
 
-static double _queue_m1ps_next_exit (void * queue)
+static double _queue_mg1ps_next_exit (void * queue)
 {
         return mg1ps_next_process((mg1ps *) queue, (void **) NULL);
+}
+
+static void _queue_mg1ps_free (void * queue)
+{
+        mg1ps_free((mg1ps *) queue);
 }
 
 queue_t * queue_from_mg1ps (mg1ps * queue, char *name)
@@ -184,8 +199,9 @@ queue_t * queue_from_mg1ps (mg1ps * queue, char *name)
         ret->arrival = _queue_mg1ps_arrival;
         ret->pop_next_exit = _queue_mg1ps_pop_next_exit;
         ret->update_time = _queue_mg1ps_update_time;
-        ret->next_exit = _queue_m1ps_next_exit;
+        ret->next_exit = _queue_mg1ps_next_exit;
         ret->output_queue = NULL;
+        ret->free = _queue_mg1ps_free;
 
         return ret;
 }
@@ -203,6 +219,11 @@ static void _queue_log_sink_update_time (void *queue, double time)
         log_sink_add_time((log_sink *) queue, time);
 }
 
+static void _queue_log_sink_free(void *queue)
+{
+        log_sink_free((log_sink *) queue);
+}
+
 queue_t * queue_from_log_sink (log_sink *log, char *name)
 {
         queue_t *ret = _queue_alloc(name);
@@ -212,6 +233,7 @@ queue_t * queue_from_log_sink (log_sink *log, char *name)
         ret->update_time = _queue_log_sink_update_time;
         ret->next_exit = NULL;
         ret->output_queue = NULL;
+        ret->free = _queue_log_sink_free;
 
         return ret;
 }

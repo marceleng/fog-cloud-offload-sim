@@ -133,6 +133,23 @@ log_sink *initialize ()
         return sink;
 }
 
+void free_queues_and_caches ()
+{
+        queue_free(fog_proc,1);
+        queue_free(core_d,1);
+        queue_free(cloud_proc,1);
+        queue_free(acc_up,1);
+        queue_free(acc_d,1);
+
+        queue_free(source_queue,1);
+        queue_free(fog_cache_queue,1);
+        queue_free(cloud_cache_queue,1);
+        queue_free(sink_queue, 0);
+
+        lru_free(lb_filter);
+        lru_free(fog_cache);
+        lru_free(cloud_cache);
+};
 
 int main (int argc, char *argv[])
 {
@@ -169,7 +186,7 @@ int main (int argc, char *argv[])
 
 
         double current_time = 0;
-        struct request *requests = (struct request *) malloc(sizeof(struct request) * number_of_arrivals);
+        struct request requests[number_of_arrivals];
         memset(requests, 0, sizeof(struct request) * number_of_arrivals);
 
         double queue_next_arrival = 0;
@@ -214,6 +231,10 @@ int main (int argc, char *argv[])
         for (size_t i = 0; i<log_size; i++) {
                 printf("%zu,%zu,%f,%f\n",res[i]->id,res[i]->content,res[i]->arrival,arrivals[i]);
         }
+
+        free_queues_and_caches();
+        zipfgen_free(arrival_gen);
+        log_sink_free(sink);
 
 
         return 0;

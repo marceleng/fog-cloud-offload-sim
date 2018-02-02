@@ -9,6 +9,8 @@
 
 typedef struct queue queue_t;
 
+void queue_free (queue_t * queue, int free_underlying_struct);
+
 /* Interactions with a single queue */
 void queue_arrival (queue_t *queue, void *request);
 void *queue_pop_next_exit(queue_t *queue);

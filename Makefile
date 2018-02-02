@@ -4,7 +4,7 @@ CC = clang
 FIND = gfind
 else
 CC = gcc
-FIND = gfind
+FIND = find
 endif
 CFLAGS = -g -Wall -Werror -std=gnu99
 LFLAGS = -fsanitize=address

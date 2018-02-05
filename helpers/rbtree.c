@@ -146,7 +146,7 @@ void rbtree_free(rbtree *tree)
         if(tree) {
                 if (tree->lchild)
                         rbtree_free(tree->lchild);
-                else if (tree->rchild)
+                if (tree->rchild)
                         rbtree_free(tree->rchild);
                 free(tree);
         }

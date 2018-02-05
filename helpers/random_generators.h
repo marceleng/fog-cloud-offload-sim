@@ -2,6 +2,7 @@
 #define _RANDOM_GENERATORS_H_
 
 double exponential_generator (double lambda);
+unsigned int urandom ();
 
 //TODO: find a hack for finishing the macro with ';'
 #define exponential_generator_func(name, lambda) double name (){\

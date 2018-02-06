@@ -47,6 +47,9 @@ double queue_net_make_next_update(queue_net *qn)
         if (orig_queue) {
                 queue_net_add_time(qn, time);
                 req = queue_pop_next_exit(orig_queue);
+                if(req->arrival < 0) { // We're entering the queue
+                        req->arrival = qn->time;
+                }
                 req->latest_timestamp = qn->time;
                 dest_queue = qn->transition(orig_queue, req);
                 LOG(LOG_INFO, "Moving request %zu from %s to %s at time %.2f\n",

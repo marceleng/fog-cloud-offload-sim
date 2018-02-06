@@ -12,6 +12,9 @@ struct zipfgen {
         long double *popularity_dist;
         rbtree *arrivals;
         double norm_factor;
+        double current_time;
+        size_t total_number_of_arrivals;
+        size_t current_number_of_arrivals;
 };
 
 static double _zipfgen_gen_arrival (zipfgen *z, double basetime, size_t * key)
@@ -59,7 +62,7 @@ static void _zipfgen_initialize (zipfgen* z)
         return;
 }
 
-zipfgen * zipfgen_alloc (double alpha, size_t catalogue_size, double lambda)
+zipfgen * zipfgen_alloc (double alpha, size_t catalogue_size, double lambda, size_t number_of_arrivals)
 {
         zipfgen *z = (zipfgen *) malloc(sizeof (zipfgen));
         z->alpha = alpha;
@@ -67,6 +70,9 @@ zipfgen * zipfgen_alloc (double alpha, size_t catalogue_size, double lambda)
         z->lambda = lambda;
         z->popularity_dist = NULL;
         z->arrivals = NULL;
+        z->current_time = 0;
+        z->total_number_of_arrivals = number_of_arrivals;
+        z->current_number_of_arrivals = 0;
         _zipfgen_initialize(z);
         return z;
 }
@@ -121,28 +127,55 @@ double zipfgen_get_popularity (zipfgen *z, size_t k)
         return 0;
 }
 
+void zipfgen_add_time(zipfgen *z, double t)
+{
+        z->current_time += t;
+}
+
 /*
  * GENERATION API
  */
 
 double zipfgen_read_next_arrival (zipfgen * z, size_t * key)
 {
-        double time = 0;
-        if (key) {
-                *key = *(size_t *)(rbtree_head(z->arrivals, &time));
+        double time = INFINITY;
+        if (z->current_number_of_arrivals < z->total_number_of_arrivals) {
+                if (key) {
+                        *key = *(size_t *)(rbtree_head(z->arrivals, &time));
+                }
+                else {
+                        rbtree_head(z->arrivals, &time);
+                }
+                time -= z->current_time;
+        }
+        else {
+                if (key) {
+                        *key = SIZE_MAX;
+                }
+                time = -1;
         }
         return time;
 }
 
 double zipfgen_pop_next_arrival (zipfgen *z, size_t * key)
 {
-        double time = 0;
-        size_t * key_local = NULL;
-        z->arrivals = rbtree_pop(z->arrivals, &time, (void  **) &key_local);
-        if(key) {
-                *key = *key_local;
+        double time = INFINITY;
+        if (z->current_number_of_arrivals < z->total_number_of_arrivals) {
+                size_t * key_local = NULL;
+                z->arrivals = rbtree_pop(z->arrivals, &time, (void  **) &key_local);
+                if(key) {
+                        *key = *key_local;
+                }
+                // We reinsert the next arrival for that key
+                _zipfgen_gen_arrival(z, time, key_local);
+                time -= z->current_time;
+                z->current_time += time;
+                z->current_number_of_arrivals++;
         }
-        // We reinsert the next arrival for that key
-        _zipfgen_gen_arrival(z, time, key_local);
+        else {
+                if (key) {
+                        *key = SIZE_MAX;
+                }
+        }
         return time;
 }

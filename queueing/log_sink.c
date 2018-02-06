@@ -35,13 +35,10 @@ void log_sink_arrival(log_sink *log, void *request)
         LOG(LOG_DEBUG, "Inserting object in log at time %f\n", log->time);
         log->objects = rbtree_insert(log->objects, request, log->time);
         log->nb_of_objects++;
-        assert(rbtree_size(log->objects) == log->nb_of_objects);
 }
 
 size_t log_sink_get_log(log_sink *log, double *arrivals, void **requests)
 {
-        assert(rbtree_size(log->objects) == log->nb_of_objects);
-        //TODO: debug flattening function, seems to return 0
         return rbtree_flatten(log->objects, requests, arrivals);
 }
 

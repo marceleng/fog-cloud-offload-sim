@@ -13,7 +13,7 @@
 
 #include "queueing/request.h"
 
-#define catalogue_size 1000000UL
+#define catalogue_size 10000000UL
 #define alpha 1.01
 
 #define x_comp 1e7
@@ -25,32 +25,59 @@
 #define c_compf 3. * 1e9
 #define c_acc (10. / 8) * 1e9
 #define tau_acc 4. * 1e-3
+#define tau_TLSf tau_acc
 
 #define c_compc 2e9
 #define tau_db 1e-3
 #define c_core (1./8) * (1e9)
 #define tau_core 40. * 1e-3
+#define tau_TLSc tau_core
 
 #define s_cachef (s_cachef_B/s_proc)
 
+double acc_up_func ()
+{
+        return exponential_generator(1./s_raw) + tau_acc;
+}
+
+double acc_d_func ()
+{
+        return exponential_generator(1./s_proc) + tau_acc;
+}
+
+double core_d_func ()
+{
+        return exponential_generator(1./s_proc) + tau_core;
+}
+
 exponential_generator_func(comp_exp_generator, 1./x_comp)
-exponential_generator_func(raw_exp_generator, 1./ s_raw)
-exponential_generator_func(proc_exp_generator, 1./ s_proc)
 
 constant_func(nowork_func,0)
+constant_func(tau_core_func,tau_core)
+constant_func(tau_acc_func,tau_acc)
+constant_func(tau_db_func, tau_db)
 
 queue_t *lb_queue = NULL;
 
+// FOG
+queue_t *fog_cache_queue = NULL;
 queue_t *fog_proc = NULL;
+queue_t *tls_acc_u = NULL;
+queue_t *tls_acc_d = NULL;
+
+//CLOUD
+queue_t *cloud_cache_queue = NULL;
 queue_t *core_d = NULL;
 queue_t *cloud_proc = NULL;
 queue_t *acc_up = NULL;
 queue_t *acc_d = NULL;
+queue_t *tls_core_u = NULL;
+queue_t *db_queue = NULL;
+
+//Sink and source
 queue_t *sink_queue = NULL;
 queue_t *source_queue = NULL;
 
-queue_t *fog_cache_queue = NULL;
-queue_t *cloud_cache_queue = NULL;
 
 lru_filter * lb_filter  = NULL;
 lru_filter * fog_cache = NULL;
@@ -60,10 +87,10 @@ queue_t *filter_function (request_t *request)
 {
         queue_t * ret = NULL;
         if(lru_update(lb_filter, request->content)) {
-                ret = fog_cache_queue;
+                ret = tls_acc_u;
         }
         else {
-                ret = cloud_cache_queue;
+                ret = tls_core_u;
         }
         return ret;
 }
@@ -75,7 +102,7 @@ queue_t *fog_cache_function (request_t *request)
                 ret = acc_d;
         }
         else {
-                ret = acc_up;
+                ret = tls_acc_d;
         }
         return ret;
 }
@@ -87,7 +114,7 @@ queue_t *cloud_cache_function (request_t *request)
                 ret = core_d;
         }
         else {
-                ret = cloud_proc;
+                ret = db_queue;
         }
         return ret;
 }
@@ -102,9 +129,16 @@ queue_t *queue_net_transition (queue_t *queue, request_t *req)
         queue_filter(queue, req, lb_queue, filter_function);
         queue_filter(queue, req, fog_cache_queue, fog_cache_function);
         queue_filter(queue, req, cloud_cache_queue, cloud_cache_function);
+
+        queue_link(queue, tls_acc_u, fog_cache_queue);
+        queue_link(queue, tls_acc_d, acc_up);
         queue_link(queue, acc_up, fog_proc);
         queue_link(queue, fog_proc, acc_d);
+
         queue_link(queue, acc_d, sink_queue);
+
+        queue_link(queue, tls_core_u, cloud_cache_queue);
+        queue_link(queue, db_queue, cloud_proc);
         queue_link(queue, cloud_proc, core_d);
         queue_link(queue, core_d, acc_d);
         return NULL;
@@ -114,11 +148,17 @@ queue_t *queue_net_transition (queue_t *queue, request_t *req)
 void initialize (double lambda, size_t number_of_arrivals, char *filename)
 {
         lb_queue = queue_from_mginf(mginf_alloc(1,nowork_func), "source");
+
         fog_proc = queue_from_mg1ps(mg1ps_alloc(c_compf, comp_exp_generator), "fog_proc");
-        core_d = queue_from_mg1ps(mg1ps_alloc(c_core, proc_exp_generator), "core_d");
+        tls_acc_d = queue_from_mginf(mginf_alloc(1, tau_acc_func), "tls_acc_d");
+        tls_acc_u = queue_from_mginf(mginf_alloc(1, tau_acc_func), "tls_acc_u");
+
+        core_d = queue_from_mg1ps(mg1ps_alloc(c_core, core_d_func), "core_d");
         cloud_proc = queue_from_mginf(mginf_alloc(c_compc, comp_exp_generator), "cloud_proc");
-        acc_up = queue_from_mg1ps(mg1ps_alloc(c_acc, raw_exp_generator), "acc_up");
-        acc_d = queue_from_mg1ps(mg1ps_alloc(c_acc, proc_exp_generator), "acc_d");
+        acc_up = queue_from_mg1ps(mg1ps_alloc(c_acc, acc_up_func), "acc_up");
+        acc_d = queue_from_mg1ps(mg1ps_alloc(c_acc, acc_d_func), "acc_d");
+        tls_core_u = queue_from_mginf(mginf_alloc(1, tau_core_func), "tls_core_u");
+        db_queue = queue_from_mginf(mginf_alloc(1, tau_db_func), "cloud_db");
 
         LOG(LOG_INFO, "Precomputing popularities...\n");
         source_queue = queue_from_zipfgen(zipfgen_alloc(alpha, catalogue_size, lambda, number_of_arrivals), "source_gen");
@@ -145,6 +185,11 @@ void free_queues_and_caches ()
         queue_free(cloud_cache_queue,1);
         queue_free(lb_queue,1);
         queue_free(sink_queue, 1);
+
+        queue_free(db_queue, 1);
+        queue_free(tls_acc_d, 1);
+        queue_free(tls_acc_u, 1);
+        queue_free(tls_core_u, 1);
 
         lru_free(lb_filter);
         lru_free(fog_cache);
@@ -173,7 +218,7 @@ int main (int argc, char *argv[])
 
         LOG(LOG_INFO, "Done, starting simulation\n");
 
-        int number_of_queues = 10;
+        int number_of_queues = 14;
         queue_t * queues[number_of_queues];
         queues[0] = lb_queue;
         queues[1] = fog_cache_queue;
@@ -185,6 +230,10 @@ int main (int argc, char *argv[])
         queues[7] = acc_d;
         queues[8] = source_queue;
         queues[9] = sink_queue;
+        queues[10] = db_queue;
+        queues[11] = tls_acc_d;
+        queues[12] = tls_acc_u;
+        queues[13] = tls_core_u;
 
         
         queue_net *qn = queue_net_alloc(number_of_queues, queues, queue_net_transition);

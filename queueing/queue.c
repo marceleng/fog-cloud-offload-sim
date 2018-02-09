@@ -194,7 +194,7 @@ static request_t *_queue_zipfgen_pop_next_exit (void * queue)
 {
         request_t *request = NULL;
         size_t key;
-         zipfgen_pop_next_arrival((zipfgen *) queue, &key);
+        zipfgen_pop_next_arrival((zipfgen *) queue, &key);
         if (key != SIZE_MAX) {
 
                 request = (request_t *) malloc(sizeof(request_t));

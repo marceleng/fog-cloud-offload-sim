@@ -5,9 +5,10 @@
 #include "request.h"
 
 #define BUFFER_SIZE 1000
-#define LINE_FORMAT "%zu,%zu,%f,%f\n"
+#define LINE_FORMAT "%f,%zu,%f,%s\n"
+#define LINE_ARGS(req) req->arrival,req->content,req->latest_timestamp,req->log
 
-#define MAX_LINE_SIZE 50
+#define MAX_LINE_SIZE 512
 
 struct file_logger {
         request_t *requests[BUFFER_SIZE];
@@ -40,7 +41,7 @@ void file_logger_dump(file_logger *log)
         size_t start = 0;
         for (size_t i=0; i<log->buffer_occupancy; i++) {
                 request_t *req = log->requests[i];
-                start += sprintf(&(buffer[start]), LINE_FORMAT, req->id, req->content, req->arrival, req->latest_timestamp);
+                start += sprintf(&(buffer[start]), LINE_FORMAT, LINE_ARGS(req));
                 free(req);
                 log->requests[i] = NULL;
         }

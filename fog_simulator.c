@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "queueing/zipfgen.h"
 #include "queueing/queue.h"
@@ -198,8 +199,8 @@ void free_queues_and_caches ()
 
 int main (int argc, char *argv[])
 {
-        if(argc!=3) {
-                LOG(LOG_ERROR, "Usage: ./fog_simulator [lambda] [number of arrivals] \n");
+        if(argc<=3) {
+                LOG(LOG_ERROR, "Usage: ./fog_simulator lambda number_of_arrivals [log_file]\n");
                 return -1;
         }
 
@@ -208,9 +209,15 @@ int main (int argc, char *argv[])
         double lambda = strtod(argv[1], NULL);
         size_t number_of_arrivals = strtoul(argv[2], NULL, 10);
 
-        char filename[50];
-        memset(filename, 0, 50);
-        sprintf(filename, "fog_sim_res_%.2f_%zu.csv",lambda, number_of_arrivals);
+        size_t filenamelen = 50;
+        char filename[filenamelen];
+        memset(filename, 0, filenamelen);
+        if(argc >= 4) {
+                strncpy(filename, argv[3], filenamelen);
+        }
+        else {
+                sprintf(filename, "fog_sim_res_%.2f_%zu.csv",lambda, number_of_arrivals);
+        }
         LOG(LOG_INFO,"Log file: %s\n", filename);
         LOG(LOG_INFO, "Initializing queueing network... \n");
 

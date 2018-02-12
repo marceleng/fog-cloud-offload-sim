@@ -132,7 +132,7 @@ queue_t *cloud_cache_function (request_t *request)
 #ifdef BLIND
 queue_t *blind_lb(__attribute__((unused)) request_t *req)
 {
-        float res = (float) urandom() / URAND_MAX;
+        double res = drandom();
         queue_t *ret;
         if (res < phi_opt)
         {

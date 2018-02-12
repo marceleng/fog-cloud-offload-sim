@@ -6,7 +6,7 @@
 #define URAND_MAX UINT_MAX
 
 double exponential_generator (double lambda);
-unsigned int urandom ();
+double drandom();
 
 //TODO: find a hack for finishing the macro with ';'
 #define exponential_generator_func(name, lambda) double name (){\

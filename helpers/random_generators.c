@@ -5,7 +5,9 @@
 #include "random_generators.h"
 
 
-unsigned int urandom ()
+static int seeded = 0;
+
+static unsigned int _urandom ()
 {
         unsigned int randuint;
         FILE *f;
@@ -17,21 +19,25 @@ unsigned int urandom ()
         return randuint;
 }
 
-__attribute__((unused)) static int seeded = 0;
+int safe_rand ()
+{
+        if (!seeded) {
+                srand(_urandom());
+                seeded = 1;
+        }
+        return rand();
+}
+
+double drandom ()
+{
+        return safe_rand() / (double) RAND_MAX;
+}
 
 double exponential_generator (double lambda)
 {
         double r;
         do {
-#ifdef __APPLE__
-                r = arc4random() / ((double) UINT32_MAX);
-#else
-                if (!seeded) {
-                        srand(urandom());
-                        seeded = 1;
-                }
-                r = rand () / ((double) RAND_MAX);
-#endif
+                r = drandom();
         } while (r==1 || r==0);
         return -log(r) / lambda;
 }

@@ -1,6 +1,10 @@
 #ifndef _RANDOM_GENERATORS_H_
 #define _RANDOM_GENERATORS_H_
 
+#include <limits.h>
+
+#define URAND_MAX UINT_MAX
+
 double exponential_generator (double lambda);
 unsigned int urandom ();
 

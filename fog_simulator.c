@@ -1,3 +1,5 @@
+#define BLIND
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -34,7 +36,14 @@
 #define tau_core 40. * 1e-3
 #define tau_TLSc tau_core
 
+#ifdef BLIND
+#define s_cachec 3.1e5
+#define phi_opt 0.42
+#endif
+
 #define s_cachef (s_cachef_B/s_proc)
+
+
 
 double acc_up_func ()
 {
@@ -120,6 +129,21 @@ queue_t *cloud_cache_function (request_t *request)
         return ret;
 }
 
+#ifdef BLIND
+queue_t *blind_lb(__attribute__((unused)) request_t *req)
+{
+        float res = (float) urandom() / URAND_MAX;
+        queue_t *ret;
+        if (res < phi_opt)
+        {
+                ret = tls_acc_u;
+        }
+        else {
+                ret = tls_core_u;
+        }
+        return ret;
+}
+#endif
 
 queue_t *queue_net_transition (queue_t *queue, request_t *req)
 {
@@ -127,7 +151,11 @@ queue_t *queue_net_transition (queue_t *queue, request_t *req)
 #define queue_filter(queue,req,q1,filter) if (queue==q1) return filter(req)
 
         queue_link(queue,source_queue,lb_queue);
+#ifdef BLIND
+        queue_filter(queue, req, lb_queue, blind_lb);
+#else
         queue_filter(queue, req, lb_queue, filter_function);
+#endif
         queue_filter(queue, req, fog_cache_queue, fog_cache_function);
         queue_filter(queue, req, cloud_cache_queue, cloud_cache_function);
 

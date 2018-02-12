@@ -55,7 +55,7 @@ double queue_net_make_next_update(queue_net *qn)
                 //FIXME: this could overload. Use req_log function?
                 req->buffer_pos += sprintf(&(req->log[req->buffer_pos]), "%f:%s:%s;", qn->time,
                                queue_get_name(orig_queue), queue_get_name(dest_queue));
-                LOG(LOG_INFO, "Moving request %zu from %s to %s at time %.2f\n",
+                fprintf(stderr, "\rMoving request %zu from %s to %s at time %.2f\n",
                                 req->id, queue_get_name(orig_queue),
                                 queue_get_name(dest_queue),
                                 qn->time);

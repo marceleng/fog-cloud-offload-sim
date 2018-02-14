@@ -8,7 +8,7 @@ number_boxes=int(sys.argv[2])
 step = maximum / number_boxes
 keys = [ (step * (3. * x / 2. + 0.5 )) for x in range(number_boxes) ]
 
-res = [0] * number_boxes
+res = [0] * (number_boxes+1)
 
 def box_number(i):
     return floor(i/step)
@@ -17,7 +17,10 @@ f=open(filename,'r')
 for line in f:
     sl = line.split(',')
     response = float(sl[2]) - float(sl[0])
-    res[box_number(response)] += 1
+    if response > maximum:
+        res[number_boxes] += 1
+    else:
+        res[box_number(response)] += 1
 
 f.close()
 print(res)

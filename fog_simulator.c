@@ -41,6 +41,9 @@
 #define phi_opt 0.42
 #endif
 
+#define k_LFU 6.1e5
+#define k_LRU 1.3e6
+
 #define s_cachef (s_cachef_B/s_proc)
 
 
@@ -145,6 +148,18 @@ queue_t *blind_lb(__attribute__((unused)) request_t *req)
 }
 #endif
 
+queue_t *lfu_lb(request_t *req)
+{
+        queue_t *ret;
+        if (req->content < k_LFU) {
+                ret = tls_acc_u;
+        }
+        else {
+                ret = tls_core_u;
+        }
+        return ret;
+}
+
 queue_t *queue_net_transition (queue_t *queue, request_t *req)
 {
 #define queue_link(queue,q1,q2) if (queue==q1) return q2
@@ -153,6 +168,8 @@ queue_t *queue_net_transition (queue_t *queue, request_t *req)
         queue_link(queue,source_queue,lb_queue);
 #ifdef BLIND
         queue_filter(queue, req, lb_queue, blind_lb);
+#elif defined LFU
+        queue_filter(queue, req, lb_queue, lfu_lb);
 #else
         queue_filter(queue, req, lb_queue, filter_function);
 #endif
@@ -196,7 +213,7 @@ void initialize (double lambda, size_t number_of_arrivals, char *filename)
         sink_queue = queue_from_file_logger(file_logger_alloc(filename),"logger");
 
         //Caches + Filter
-        lb_filter  = lru_alloc(2*s_cachef, catalogue_size);
+        lb_filter  = lru_alloc(k_LRU, catalogue_size);
         fog_cache = lru_alloc(s_cachef, catalogue_size);
         cloud_cache = lru_alloc(s_cachef, catalogue_size);
 }

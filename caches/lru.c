@@ -57,7 +57,10 @@ static lru_node *_lru_node_alloc(size_t entry)
 static lru_node* _lru_remove_node (size_t entry, lru_filter *lru)
 {
         lru_node *node=lru->map[entry];
-        assert (entry < lru->map_size);
+        if (entry >= lru->map_size) {
+                printf("Wrong entry: %zu but map_size is %zu\n", entry, lru->map_size);
+                exit(1);
+        }
         if(node) {
                 if(node->parent) {
                         node->parent->child = node->child;

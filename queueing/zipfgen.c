@@ -176,6 +176,7 @@ double zipfgen_pop_next_arrival (zipfgen *z, size_t * key)
                 if (key) {
                         *key = SIZE_MAX;
                 }
+                time = -1;
         }
         return time;
 }

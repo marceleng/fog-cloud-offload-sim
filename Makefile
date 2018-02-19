@@ -27,7 +27,7 @@ fog_sim: create_dir $(HOBJECTS) $(FOG_SIM_OBJ)
 	$(CC) -I$(INCLUDE) $(FOG_SIM_OBJ) $(HOBJECTS) -o fog_simulator $(LFLAGS)
 
 2lru: create_dir $(HOBJECTS) $(2LRU_OBJ)
-	$(CC) -I$(INCLUDE) $(2LRU_OBJ) $(HOBJECTS) -o 2lru_sim
+	$(CC) -I$(INCLUDE) $(2LRU_OBJ) $(HOBJECTS) -o 2lru_sim $(LFLAGS)
 
 .SECONDEXPANSION:
 

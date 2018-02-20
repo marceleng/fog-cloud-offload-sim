@@ -26,7 +26,14 @@ void dlru_free (dlru *lru)
 
 int dlru_update (dlru *lru, size_t entry)
 {
-        return (lru_update(lru->filter, entry) && lru_update(lru->cache, entry));
+        int ret = 0;
+        if(lru_update(lru->filter, entry)) {
+                ret = lru_update(lru->cache, entry);
+        }
+        else {
+                ret = lru_contains(lru->cache, entry);
+        }
+        return ret;
 }
 
 void dlru_resize_filter(dlru *lru, size_t new_size)

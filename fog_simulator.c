@@ -1,4 +1,4 @@
-#define BLIND
+#define LRU
 
 #include <stdio.h>
 #include <string.h>
@@ -8,6 +8,7 @@
 #include "queueing/queue.h"
 #include "queueing/queue_net.h"
 #include "queueing/file_logger.h"
+#include "queueing/ter_counter.h"
 
 #include "caches/lru.h"
 
@@ -41,6 +42,7 @@
 #define phi_opt 0.42
 #endif
 
+#define k_LFU_2s 1.2e6
 #define k_LFU 6.1e5
 #define k_LRU 1.3e6
 
@@ -210,7 +212,6 @@ void initialize (double lambda, size_t number_of_arrivals, char *filename)
         source_queue = queue_from_zipfgen(zipfgen_alloc(alpha, catalogue_size, lambda, number_of_arrivals), "source_gen");
         fog_cache_queue = queue_from_mginf(mginf_alloc(1,nowork_func), "fog_cache");
         cloud_cache_queue = queue_from_mginf(mginf_alloc(1, nowork_func), "cloud_cache");
-        sink_queue = queue_from_file_logger(file_logger_alloc(filename),"logger");
 
         //Caches + Filter
         lb_filter  = lru_alloc(k_LRU, catalogue_size);
@@ -244,7 +245,7 @@ void free_queues_and_caches ()
 
 int main (int argc, char *argv[])
 {
-        if(argc<=3) {
+        if(argc<3) {
                 LOG(LOG_ERROR, "Usage: ./fog_simulator lambda number_of_arrivals [log_file]\n");
                 return -1;
         }
@@ -255,15 +256,20 @@ int main (int argc, char *argv[])
         size_t number_of_arrivals = strtoul(argv[2], NULL, 10);
 
         size_t filenamelen = 50;
-        char filename[filenamelen];
-        memset(filename, 0, filenamelen);
+        char *filename = NULL;
+        ter_counter *count_log = NULL;
+
         if(argc >= 4) {
+                filename = (char *) malloc(sizeof(char) * filenamelen);
+                memset(filename, 0, filenamelen);
                 strncpy(filename, argv[3], filenamelen);
+                LOG(LOG_INFO,"Log file: %s\n", filename);
+                sink_queue = queue_from_file_logger(file_logger_alloc(filename),"logger");
         }
         else {
-                sprintf(filename, "fog_sim_res_%.2f_%zu.csv",lambda, number_of_arrivals);
+                count_log = ter_counter_alloc(delta_app);
+                sink_queue =  queue_from_ter_counter(count_log, "logger");
         }
-        LOG(LOG_INFO,"Log file: %s\n", filename);
         LOG(LOG_INFO, "Initializing queueing network... \n");
 
         initialize(lambda, number_of_arrivals, filename);
@@ -291,6 +297,11 @@ int main (int argc, char *argv[])
         queue_net *qn = queue_net_alloc(number_of_queues, queues, queue_net_transition);
 
         while(queue_net_make_next_update(qn) >= 0);
+
+        if (count_log)
+        {
+                printf("%zu\n", ter_counter_get_counter(count_log));
+        }
 
         free(qn);
         free_queues_and_caches();

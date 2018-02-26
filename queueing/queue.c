@@ -265,3 +265,29 @@ queue_t * queue_from_file_logger (file_logger *log, char *name)
 }
 
 
+/*
+ * Threshold Exceeding Rate Counter
+ */
+
+static void _queue_ter_counter_arrival(void *queue, request_t *request)
+{
+        ter_counter_arrival((ter_counter *) queue, request);
+}
+
+static void _queue_ter_counter_free(void *queue)
+{
+        ter_counter_free((ter_counter *) queue);
+}
+
+queue_t * queue_from_ter_counter (ter_counter *log, char *name)
+{
+        queue_t *ret = _queue_alloc(name);
+        ret->queue = log;
+        ret->arrival = _queue_ter_counter_arrival;
+        ret->pop_next_exit = NULL;
+        ret->update_time = NULL;
+        ret->next_exit = NULL;
+        ret->free = _queue_ter_counter_free;
+
+        return ret;
+}

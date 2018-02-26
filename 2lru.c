@@ -12,18 +12,20 @@
 int main (int argc, char *argv[])
 {
 
-        if ((argc != 6) || ((strcmp(argv[3], "traces")!=0) && (strcmp(argv[3],"zipf")!=0))) {
-                fprintf (stderr, "Usage: ./2lru catalogue_size cache_size [traces alpha trace_file | zipf alpha number_of_queries]\n");
-                return -1;
-        }
+        //if ((argc != 6) || ((strcmp(argv[3], "traces")!=0) && (strcmp(argv[3],"zipf")!=0))) {
+        //        fprintf (stderr, "Usage: ./2lru catalogue_size cache_size [traces alpha trace_file | zipf alpha number_of_queries]\n");
+        //        return -1;
+        //}
 
         size_t catalogue_size = strtoul(argv[1], NULL, 10);
         size_t cache_size = strtoul(argv[2], NULL, 10);
         double alpha = strtod(argv[4], NULL);
+        size_t manual = strtoul(argv[6], NULL, 10);
 
         lru_filter * lrucache = lru_alloc(cache_size, catalogue_size);
         dlru *dlru_guideline_alpha = dlru_alloc(cache_size, dlru_opt_filter_size_alpha(cache_size, catalogue_size, alpha), catalogue_size);
-        dlru *dlru_guideline_noalpha = dlru_alloc(cache_size, dlru_opt_filter_size_noalpha(cache_size, catalogue_size), catalogue_size);
+        //dlru *dlru_guideline_noalpha = dlru_alloc(cache_size, dlru_opt_filter_size_noalpha(cache_size, catalogue_size), catalogue_size);
+        dlru *dlru_guideline_noalpha = dlru_alloc(cache_size, manual, catalogue_size);
         dlru *dlru_noguideline = dlru_alloc(cache_size, cache_size, catalogue_size);
 
         size_t hit_lru = 0;
@@ -83,6 +85,6 @@ int main (int argc, char *argv[])
         dlru_free (dlru_guideline_noalpha);
         dlru_free (dlru_noguideline);
 
-        printf("LRU: %f; 2LRU-a: %f, 2LRU-na: %f, 2LRU-ng: %f\n", hit_lru/nb_arrivals, hit_2lru_ga/nb_arrivals, hit_2lru_gna/nb_arrivals, hit_2lru_ng/nb_arrivals);
+        printf("%f %f %f %f\n", hit_lru/nb_arrivals, hit_2lru_ga/nb_arrivals, hit_2lru_gna/nb_arrivals, hit_2lru_ng/nb_arrivals);
         return 0;
 }

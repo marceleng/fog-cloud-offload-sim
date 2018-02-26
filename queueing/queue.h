@@ -8,6 +8,7 @@
 #include "log_sink.h"
 #include "zipfgen.h"
 #include "file_logger.h"
+#include "ter_counter.h"
 
 #include "request.h"
 
@@ -29,5 +30,6 @@ queue_t * queue_from_mginf (mginf *, char *);
 queue_t * queue_from_log_sink(log_sink *, char *);
 queue_t * queue_from_zipfgen (zipfgen *z, char *name);
 queue_t * queue_from_file_logger (file_logger *log, char *name);
+queue_t * queue_from_ter_counter (ter_counter *log, char *name);
 
 #endif

@@ -28,6 +28,14 @@ int safe_rand ()
         return rand();
 }
 
+int irandom(int min, int max)
+{
+        size_t res = (size_t) safe_rand();
+        res *= (max - min);
+        res /= RAND_MAX;
+        return (int) res;
+}
+
 double drandom ()
 {
         return safe_rand() / (double) RAND_MAX;

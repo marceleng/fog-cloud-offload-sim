@@ -11,4 +11,5 @@ void lru_free(lru_filter *lru);
 int lru_update(lru_filter *lru, size_t entry);
 int lru_contains(lru_filter *lru, size_t entry);
 void lru_resize(lru_filter *lru, size_t new_size);
+size_t *lru_toarr(lru_filter *lru, size_t *nb_objects);
 #endif

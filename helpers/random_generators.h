@@ -7,6 +7,7 @@
 
 double exponential_generator (double lambda);
 double drandom();
+int irandom(int min, int max);
 
 //TODO: find a hack for finishing the macro with ';'
 #define exponential_generator_func(name, lambda) double name (){\

@@ -16,6 +16,7 @@ SUBDIRS = caches helpers queueing
 
 2LRU_OBJ = $(addprefix $(BUILDIR)/,2lru.o)
 FOG_SIM_OBJ =  $(addprefix $(BUILDIR)/,fog_simulator.o)
+6CN_OBJ = $(addprefix $(BUILDIR)/,6cn.o)
 
 HSOURCES = $(shell find $(SUBDIRS) -type f -iname '*.c')
 
@@ -28,6 +29,9 @@ fog_sim: create_dir $(HOBJECTS) $(FOG_SIM_OBJ)
 
 2lru: create_dir $(HOBJECTS) $(2LRU_OBJ)
 	$(CC) -I$(INCLUDE) $(2LRU_OBJ) $(HOBJECTS) -o 2lru_sim $(LFLAGS)
+
+6cn: create_dir $(HOBJECTS) $(6CN_OBJ)
+	$(CC) -I$(INCLUDE) $(6CN_OBJ) $(HOBJECTS) -o ats_lru $(LFLAGS)
 
 .SECONDEXPANSION:
 

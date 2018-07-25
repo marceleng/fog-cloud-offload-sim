@@ -165,3 +165,18 @@ void lru_resize(lru_filter *lru, size_t new_size)
                 _lru_free_tail(lru);
         }
 }
+
+size_t *lru_toarr(lru_filter *lru, size_t *nb_objects)
+{
+        *nb_objects = lru->nb_objects;
+        size_t *ret = (size_t*) malloc(sizeof(size_t) * lru->nb_objects);
+
+        size_t cnt = 0;
+        lru_node * cur_node = lru->head;
+        while (cur_node) {
+                ret[cnt++] = cur_node->key;
+                cur_node = cur_node->child;
+        }
+        assert(cnt == *nb_objects);
+        return ret;
+}

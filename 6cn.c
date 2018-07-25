@@ -21,7 +21,7 @@ int main (int argc, char *argv[]) {
 
         size_t nb_arrivals = 10000000000;
 
-        printf("Initialization...");
+        printf("Initialization... catalogue_size=%zu, alpha=%f, cache_size=%zu, filter_size=%zu");
         zipfgen *source = zipfgen_alloc(alpha, catalogue_size, 1, nb_arrivals);
         lru_filter *cache = lru_alloc(cache_size, catalogue_size);
         lru_filter *filter = lru_alloc(filter_size, catalogue_size);
@@ -44,7 +44,7 @@ int main (int argc, char *argv[]) {
         }
         printf("\n");
 
-        printf("%f: %f\n", alpha, ((double) hit_counter) / (double) catalogue_size);
+        printf("%f: %f\n", ((double) filter_size) / (double) catalogue_size, ((double) hit_counter) / (double) nb_arrivals);
 
         /*
         size_t nb_objects_filter = 0;
